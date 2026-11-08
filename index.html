@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlatmateMatch - Tinder for Flatmates</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Plus Jakarta+ Sans', sans-serif; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 h-full flex flex-col antialiased selection:bg-rose-500 selection:text-white">
+
+    <!-- Top Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="switchTab('discover')">
+                <div class="bg-gradient-to-tr from-rose-500 to-orange-500 p-2 rounded-xl text-white shadow-md shadow-rose-500/20">
+                    <i data-lucide="home" class="w-5 h-5"></i>
+                </div>
+                <span class="font-bold text-xl tracking-tight bg-gradient-to-r from-rose-600 to-orange-600 bg-clip-text text-transparent">FlatmateMatch</span>
+            </div>
+            
+            <div class="flex items-center space-x-1 sm:space-x-2 bg-slate-100 p-1 rounded-full">
+                <button onclick="switchTab('discover')" id="nav-discover" class="px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 bg-white text-rose-600 shadow-sm">Discover</button>
+                <button onclick="switchTab('listings')" id="nav-listings" class="px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900">Listings</button>
+                <button onclick="switchTab('chats')" id="nav-chats" class="px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900">Chats</button>
+            </div>
+
+            <button onclick="openProfileModal()" class="p-2 rounded-full hover:bg-slate-100 text-slate-600 transition">
+                <i data-lucide="user" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 max-w-4xl w-full mx-auto p-4 flex flex-col relative overflow-hidden">
+        
+        <!-- TAB 1: DISCOVER (Swipe & Match) -->
+        <section id="tab-discover" class="flex-1 flex flex-col items-center justify-center relative pb-16">
+            <!-- Filter Bar -->
+            <div class="w-full max-w-md mb-4 flex items-center justify-between bg-white border border-slate-200 rounded-2xl px-4 py-2.5 shadow-sm">
+                <div class="flex items-center space-x-2 text-sm text-slate-600">
+                    <i data-lucide="map-pin" class="w-4 h-4 text-rose-500"></i>
+                    <span id="current-location-label" class="font-medium">Purnia / Patna</span>
+                </div>
+                <button onclick="openFilterModal()" class="flex items-center space-x-1 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl transition">
+                    <i data-lucide="sliders-horizontal" class="w-3.5 h-3.5"></i>
+                    <span>Filters</span>
+                </button>
+            </div>
+
+            <!-- Card Stack Container -->
+            <div id="card-container" class="w-full max-w-md h-[460px] relative flex items-center justify-center">
+                <!-- Dynamic Cards injected via JS -->
+            </div>
+
+            <!-- Swipe Action Buttons -->
+            <div class="absolute bottom-2 flex items-center space-x-6 z-20">
+                <button onclick="handleSwipe('pass')" class="w-14 h-14 bg-white border border-slate-200 rounded-full flex items-center justify-center text-rose-500 shadow-md hover:scale-110 active:scale-95 transition">
+                    <i data-lucide="x" class="w-7 h-7"></i>
+                </button>
+                <button onclick="handleSwipe('like')" class="w-16 h-16 bg-gradient-to-tr from-rose-500 to-orange-500 rounded-full flex items-center justify-center text-white shadow-lg shadow-rose-500/35 hover:scale-110 active:scale-95 transition">
+                    <i data-lucide="heart" class="w-8 h-8 fill-current"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- TAB 2: LISTINGS (Rooms / Apartments) -->
+        <section id="tab-listings" class="hidden flex-1 flex flex-col pb-16">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Available Rooms & Flats</h2>
+                    <p class="text-xs text-slate-500">Find verified spaces looking for flatmates</p>
+                </div>
+                <button onclick="openAddListingModal()" class="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-xl text-sm font-semibold shadow-md shadow-rose-600/20 flex items-center space-x-1.5 transition">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Post Room</span>
+                </button>
+            </div>
+
+            <!-- Listings Grid -->
+            <div id="listings-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto pr-1">
+                <!-- Populated via JS -->
+            </div>
+        </section>
+
+        <!-- TAB 3: CHATS & MATCHES -->
+        <section id="tab-chats" class="hidden flex-1 flex flex-col pb-16">
+            <h2 class="text-xl font-bold text-slate-900 mb-1">Your Matches & Chats</h2>
+            <p class="text-xs text-slate-500 mb-4">Connect with potential flatmates instantly</p>
+
+            <div class="flex-1 bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                <div id="chat-list" class="divide-y divide-slate-100 overflow-y-auto flex-1">
+                    <!-- Chat items populated via JS -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Chat Room Modal (Hidden by default) -->
+    <div id="chat-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg h-[550px] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200">
+            <!-- Chat Header -->
+            <div class="px-4 py-3 bg-white border-b border-slate-200 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <img id="active-chat-avatar" src="" class="w-10 h-10 rounded-full object-cover border border-slate-200" alt="">
+                    <div>
+                        <h4 id="active-chat-name" class="font-bold text-sm text-slate-900"></h4>
+                        <span class="text-[10px] text-emerald-600 font-medium flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Active Match
+                        </span>
+                    </div>
+                </div>
+                <button onclick="closeChatModal()" class="p-2 text-slate-400 hover:text-slate-600 rounded-full">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <!-- Messages Box -->
+            <div id="chat-messages" class="flex-1 p-4 bg-slate-50 overflow-y-auto space-y-3">
+                <!-- Dynamic messages -->
+            </div>
+            <!-- Chat Input -->
+            <div class="p-3 bg-white border-t border-slate-200 flex items-center space-x-2">
+                <input type="text" id="chat-input" placeholder="Type a message..." class="flex-1 bg-slate-100 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-rose-500 outline-none">
+                <button onclick="sendMessage()" class="bg-rose-600 hover:bg-rose-700 text-white p-2.5 rounded-xl transition shadow-md shadow-rose-600/20">
+                    <i data-lucide="send" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post Room Listing Modal -->
+    <div id="listing-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl p-6 overflow-y-auto max-h-[90vh]">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg text-slate-900">Post a Room / Flat</h3>
+                <button onclick="closeAddListingModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="listing-form" onsubmit="handlePostListing(event)" class="space-y-3 text-sm">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Property Title / Location</label>
+                    <input type="text" id="l-title" required placeholder="e.g. 2BHK Furnished Flat near Station" class="w-full bg-slate-100 border-none rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-rose-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Rent per Month (₹)</label>
+                        <input type="number" id="l-rent" required placeholder="8500" class="w-full bg-slate-100 border-none rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-rose-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Looking For</label>
+                        <select id="l-pref" class="w-full bg-slate-100 border-none rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-rose-500">
+                            <option value="Male">Male Flatmate</option>
+                            <option value="Female">Female Flatmate</option>
+                            <option value="Anyone">Anyone</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Image URL (Unsplash or direct link)</label>
+                    <input type="url" id="l-img" required placeholder="https://images.unsplash.com/photo-..." class="w-full bg-slate-100 border-none rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-rose-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Amenities & Description</label>
+                    <textarea id="l-desc" rows="3" placeholder="WiFi, AC, Kitchen, No restriction..." class="w-full bg-slate-100 border-none rounded-xl p-2.5 outline-none focus:ring-2 focus:ring-rose-500"></textarea>
+                </div>
+                <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-semibold py-3 rounded-xl shadow-lg shadow-rose-600/20 transition">Publish Listing</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Filter Modal -->
+    <div id="filter-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-lg text-slate-900">Preferences Filter</h3>
+                <button onclick="closeFilterModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="space-y-4 text-sm">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Max Budget: <span id="budget-val" class="text-rose-600">₹15,000</span></label>
+                    <input type="range" min="3000" max="30000" step="1000" value="15000" id="filter-budget" oninput="document.getElementById('budget-val').innerText = '₹' + Number(this.value).toLocaleString()" class="w-full accent-rose-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Sleep Habit</label>
+                    <select id="filter-sleep" class="w-full bg-slate-100 border-none rounded-xl p-2.5 outline-none">
+                        <option value="All">All Schedules</option>
+                        <option value="Early Bird">Early Bird 🌅</option>
+                        <option value="Night Owl">Night Owl 🌙</option>
+                    </select>
+                </div>
+                <button onclick="applyFilters()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 rounded-xl transition">Apply Filters</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80" class="w-20 h-20 rounded-full object-cover mx-auto mb-3 border-2 border-rose-500 p-0.5" alt="Profile">
+            <h3 class="font-bold text-lg text-slate-900">Raj Kumar Sharma</h3>
+            <p class="text-xs text-slate-500 mb-4">AI Mentor & Developer • Purnia, Bihar</p>
+            <div class="bg-slate-50 rounded-xl p-3 text-left text-xs space-y-1.5 mb-4 text-slate-700">
+                <p><strong>Budget:</strong> ₹10,000 / mo</p>
+                <p><strong>Sleep Habit:</strong> Night Owl 🌙</p>
+                <p><strong>Cleanliness:</strong> Neat & Clean ✨</p>
+            </div>
+            <button onclick="closeProfileModal()" class="w-full bg-slate-900 text-white font-semibold py-2.5 rounded-xl text-sm transition">Close Profile</button>
+        </div>
+    </div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Initial Mock Data
+        let profiles = [
+            { id: 1, name: "Aarav Mehta", age: 24, profession: "Software Engineer", budget: "₹9,500", sleep: "Night Owl", clean: "Very Clean", bio: "Looking for a chill flatmate who respects privacy and loves weekend coding or coffee.", image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=600&q=80" },
+            { id: 2, name: "Priya Sharma", age: 23, profession: "UX Designer", budget: "₹12,000", sleep: "Early Bird", clean: "Moderate", bio: "Art lover, quiet environment preferred. I have a friendly cat!", image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80" },
+            { id: 3, name: "Vikram Singh", age: 26, profession: "Data Analyst", budget: "₹11,000", sleep: "Night Owl", clean: "Extremely Clean", bio: "Gym enthusiast, cooks dinner sometimes. Looking for someone with similar vibes.", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80" }
+        ];
+
+        let listings = [
+            { id: 1, title: "Fully Furnished 1RK near City Center", rent: "₹8,500", pref: "Male", img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=600&q=80", desc: "Includes AC, WiFi, Geyser, and 24/7 Water supply." },
+            { id: 2, title: "Spacious 2BHK Master Bedroom", rent: "₹11,000", pref: "Anyone", img: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=600&q=80", desc: "Independent washroom, balcony view, peaceful locality." }
+        ];
+
+        let matches = [
+            { id: 1, name: "Aarav Mehta", avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=600&q=80", lastMsg: "Hey! When are you planning to shift?" }
+        ];
+
+        let currentProfileIndex = 0;
+        let activeChatUser = null;
+
+        // Initialize App
+        document.addEventListener("DOMContentLoaded", () => {
+            lucide.createIcons();
+            renderCard();
+            renderListings();
+            renderChats();
+        });
+
+        // Tab Switching
+        function switchTab(tab) {
+            ['discover', 'listings', 'chats'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`nav-${t}`).className = "px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 text-slate-600 hover:text-slate-900";
+            });
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`nav-${tab}`).className = "px-4 py-1.5 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 bg-white text-rose-600 shadow-sm";
+            lucide.createIcons();
+        }
+
+        // Render Discover Card
+        function renderCard() {
+            const container = document.getElementById("card-container");
+            if (currentProfileIndex >= profiles.length) {
+                container.innerHTML = `
+                    <div class="text-center p-6 bg-white rounded-3xl border border-slate-200 shadow-sm w-full">
+                        <div class="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <i data-lucide="check" class="w-8 h-8"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-900 text-lg">All caught up!</h3>
+                        <p class="text-xs text-slate-500 mb-4">No more profiles nearby. Check back later or adjust your filters.</p>
+                        <button onclick="currentProfileIndex=0; renderCard();" class="bg-rose-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">Reset Stack</button>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            const p = profiles[currentProfileIndex];
+            container.innerHTML = `
+                <div class="w-full h-full bg-white rounded-3xl shadow-xl border border-slate-200 overflow-hidden flex flex-col relative select-none animate-in zoom-in-95 duration-200">
+                    <img src="${p.image}" class="w-full h-3/5 object-cover" alt="${p.name}">
+                    <div class="absolute top-3 right-3 bg-slate-900/60 backdrop-blur-md text-white text-xs font-semibold px-3 py-1 rounded-full">
+                        Budget: ${p.budget}
+                    </div>
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-xl font-bold text-slate-900">${p.name}, <span class="font-normal text-slate-600">${p.age}</span></h3>
+                            </div>
+                            <p class="text-xs font-semibold text-rose-600 mb-2">${p.profession}</p>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="bg-slate-100 text-slate-700 text-[10px] px-2.5 py-1 rounded-lg font-medium">🌙 ${p.sleep}</span>
+                                <span class="bg-slate-100 text-slate-700 text-[10px] px-2.5 py-1 rounded-lg font-medium">✨ ${p.clean}</span>
+                            </div>
+                            <p class="text-xs text-slate-600 line-clamp-2">${p.bio}</p>
+                        </div>
+                    </div>
+                </div>`;
+            lucide.createIcons();
+        }
+
+        function handleSwipe(action) {
+            const p = profiles[currentProfileIndex];
+            if (action === 'like') {
+                // Add to matches
+                if(!matches.some(m => m.id === p.id)) {
+                    matches.unshift({ id: p.id, name: p.name, avatar: p.image, lastMsg: "Matched! Say hello 👋" });
+                    renderChats();
+                }
+            }
+            currentProfileIndex++;
+            renderCard();
+        }
+
+        // Render Listings
+        function renderListings() {
+            const grid = document.getElementById("listings-grid");
+            grid.innerHTML = listings.map(l => `
+                <div class="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition">
+                    <img src="${l.img}" class="w-full h-36 object-cover" alt="">
+                    <div class="p-4">
+                        <div class="flex justify-between items-start mb-1">
+                            <h4 class="font-bold text-sm text-slate-900">${l.title}</h4>
+                            <span class="text-rose-600 font-bold text-xs">${l.rent}/mo</span>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-3">${l.desc}</p>
+                        <button onclick="alert('Inquiry sent to property owner!')" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold py-2 rounded-xl transition">Contact Owner</button>
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        // Render Chats
+        function renderChats() {
+            const list = document.getElementById("chat-list");
+            if(matches.length === 0) {
+                list.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs">No matches yet. Start swiping in Discover!</div>`;
+                return;
+            }
+            list.innerHTML = matches.map(m => `
+                <div onclick="openChatModal(${m.id})" class="p-4 flex items-center space-x-3 hover:bg-slate-50 cursor-pointer transition">
+                    <img src="${m.avatar}" class="w-12 h-12 rounded-full object-cover border border-slate-200" alt="">
+                    <div class="flex-1">
+                        <h4 class="font-bold text-sm text-slate-900">${m.name}</h4>
+                        <p class="text-xs text-slate-500">${m.lastMsg}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Chat Modal Controls
+        function openChatModal(id) {
+            const m = matches.find(item => item.id === id);
+            activeChatUser = m;
+            document.getElementById("active-chat-name").innerText = m.name;
+            document.getElementById("active-chat-avatar").src = m.avatar;
+            document.getElementById("chat-messages").innerHTML = `
+                <div class="bg-white p-3 rounded-2xl shadow-sm text-xs text-slate-700 max-w-[80%]">
+                    Hey there! Let's discuss flat sharing.
+                </div>`;
+            document.getElementById("chat-modal").classList.remove('hidden');
+            document.getElementById("chat-modal").classList.add('flex');
+        }
+
+        function closeChatModal() {
+            document.getElementById("chat-modal").classList.add('hidden');
+            document.getElementById("chat-modal").classList.remove('flex');
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("chat-input");
+            const msg = input.value.trim();
+            if(!msg) return;
+            
+            const box = document.getElementById("chat-messages");
+            box.innerHTML += `
+                <div class="bg-rose-600 text-white p-3 rounded-2xl shadow-sm text-xs max-w-[80%] ml-auto">
+                    ${msg}
+                </div>`;
+            input.value = "";
+            box.scrollTop = box.scrollHeight;
+
+            // Simulated Auto-Reply
+            setTimeout(() => {
+                box.innerHTML += `
+                    <div class="bg-white p-3 rounded-2xl shadow-sm text-xs text-slate-700 max-w-[80%]">
+                        Sounds good! Let's connect over a call tomorrow. 👍
+                    </div>`;
+                box.scrollTop = box.scrollHeight;
+            }, 1000);
+        }
+
+        // Listing Modal Controls
+        function openAddListingModal() {
+            document.getElementById("listing-modal").classList.remove('hidden');
+            document.getElementById("listing-modal").classList.add('flex');
+        }
+        function closeAddListingModal() {
+            document.getElementById("listing-modal").classList.add('hidden');
+            document.getElementById("listing-modal").classList.remove('flex');
+        }
+        function handlePostListing(e) {
+            e.preventDefault();
+            const newListing = {
+                id: listings.length + 1,
+                title: document.getElementById("l-title").value,
+                rent: "₹" + Number(document.getElementById("l-rent").value).toLocaleString(),
+                pref: document.getElementById("l-pref").value,
+                img: document.getElementById("l-img").value,
+                desc: document.getElementById("l-desc").value
+            };
+            listings.unshift(newListing);
+            renderListings();
+            closeAddListingModal();
+            document.getElementById("listing-form").reset();
+            switchTab('listings');
+        }
+
+        // Filter Modal Controls
+        function openFilterModal() {
+            document.getElementById("filter-modal").classList.remove('hidden');
+            document.getElementById("filter-modal").classList.add('flex');
+        }
+        function closeFilterModal() {
+            document.getElementById("filter-modal").classList.add('hidden');
+            document.getElementById("filter-modal").classList.remove('flex');
+        }
+        function applyFilters() {
+            closeFilterModal();
+            alert("Filters applied successfully!");
+        }
+
+        // Profile Modal Controls
+        function openProfileModal() {
+            document.getElementById("profile-modal").classList.remove('hidden');
+            document.getElementById("profile-modal").classList.add('flex');
+        }
+        function closeProfileModal() {
+            document.getElementById("profile-modal").classList.add('hidden');
+            document.getElementById("profile-modal").classList.remove('flex');
+        }
+    </script>
+</body>
+</html>
