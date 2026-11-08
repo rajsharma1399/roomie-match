@@ -1,7 +1,7 @@
 <div align="center">
 
-  <<img width="1366" height="768" alt="Screenshot (382)" src="https://github.com/user-attachments/assets/ce3002cc-53aa-44fb-ab5c-4273d7672b2f" />
-/>
+  <img width="1024" height="254" alt="image" src="https://github.com/user-attachments/assets/736b5576-0522-41aa-b645-f4cea4a0217f" />
+
 
   # 🏠 FlatmateMatch — The Next-Gen Shared Living Platform
   
@@ -26,8 +26,8 @@ Finding a compatible flatmate in metropolitan cities across India is notoriously
 ## 🖥️ Product Interface
 
 <div align="center">
-  <img src="assets/preview.png" alt="FlatmateMatch Dashboard" width="90%" style="border-radius: 12px; border: 1px solid #334155; box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.5);"/>
-</div>
+ <img width="1365" height="634" alt="Screenshot 2026-11-08 165643" src="https://github.com/user-attachments/assets/ef623a0a-5f61-4613-900a-3ae31e4fdca7" />
+
 
 > *Above: The core discovery and matchmaking interface featuring dark-mode UI, smart percentage match calculation, and dynamic filter controls.*
 
