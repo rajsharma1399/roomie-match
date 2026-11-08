@@ -1,6 +1,7 @@
 <div align="center">
 
-  <img src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=1200&q=80" width="100%" height="250px" style="object-fit: cover; border-radius: 12px;" alt="Banner"/>
+  <<img width="1366" height="768" alt="Screenshot (382)" src="https://github.com/user-attachments/assets/ce3002cc-53aa-44fb-ab5c-4273d7672b2f" />
+/>
 
   # 🏠 FlatmateMatch — The Next-Gen Shared Living Platform
   
